@@ -11,6 +11,9 @@ public class AnaMenu : MonoBehaviour
     public Text starText;
 
     public int star;
+
+    public AdManager Ad;
+
     void Start()
     {
         int enYuksekSkor = PlayerPrefs.GetInt("kayit");
@@ -19,7 +22,9 @@ public class AnaMenu : MonoBehaviour
 
         scoreText.text = "Score " + score;
         highScoreText.text = "High Score " + enYuksekSkor;
-        
+
+        Ad = Object.FindObjectOfType<AdManager>();
+        Ad.showBannerAd();
 
     }
 
@@ -36,6 +41,7 @@ public class AnaMenu : MonoBehaviour
 
     public void OyundanCik()
     {
-        Application.Quit();
+        Ad.requestFullScreenAd();
+        Ad._fullscreenAd.OnAdClosed += (sender, args) => { Application.Quit(); };
     }
 }

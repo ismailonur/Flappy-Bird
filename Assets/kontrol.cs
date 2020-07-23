@@ -26,6 +26,8 @@ public class kontrol : MonoBehaviour
 
     int enYuksekPuan = 0;
 
+    public AdManager Ad;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -34,7 +36,7 @@ public class kontrol : MonoBehaviour
         sesler = GetComponents<AudioSource>();
         enYuksekPuan = PlayerPrefs.GetInt("kayit");
 
-        Debug.Log(enYuksekPuan);
+        Ad = Object.FindObjectOfType<AdManager>();
     }
 
      
@@ -113,7 +115,9 @@ public class kontrol : MonoBehaviour
     void AnaMenuyeDon()
     {
         PlayerPrefs.SetInt("puanKayit", puan);
-        SceneManager.LoadScene("AnaMenu");
+        Ad.requestFullScreenAd();
+        Ad._fullscreenAd.OnAdClosed += (sender, args) => { SceneManager.LoadScene("AnaMenu"); };
+        
     }
 
 }

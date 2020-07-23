@@ -27,11 +27,22 @@ public class AdManager : MonoBehaviour
     public Text FullScreen;
     public Text Rewarded;
 
-    public bool FullScreenAdControl = true;
-    public bool RewardedAdControl = true;
+    static AdManager reklamKontrol;
 
+    public int star;
     public void Start()
     {
+        if(reklamKontrol == null)
+        {
+            DontDestroyOnLoad(gameObject);
+            reklamKontrol = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        
+
         #if UNITY_ANDROID
             string appId = "ca-app-pub-7215776518930801~4603552933";
         #elif UNITY_IPHONE
@@ -39,8 +50,7 @@ public class AdManager : MonoBehaviour
         #else
             string appId= "unexpected_platform";
         #endif
-         
-
+        
         MobileAds.Initialize(appId);
 
     }
@@ -53,31 +63,9 @@ public class AdManager : MonoBehaviour
             showBannerAd();
         }
 
-        // FullScreen reklamamızı test etmek için F tuşuna basacağız.
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            showFullScreenAd();
-        }
-
-        // Rewarded reklamamızı test etmek için R tuşuna basacağız.
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            showRewardedAd();
-        }
-
-        if (FullScreenAdControl)
-        {
-            requestFullScreenAd();
-            FullScreenAdControl = false;
-        }
-
-        if (RewardedAdControl)
-        {
-            requestRewardedAd();
-            RewardedAdControl = false;
-        }
     }
 
+    // BANNERAD START
     public void requestBannerAd()
     {
 
@@ -97,6 +85,8 @@ public class AdManager : MonoBehaviour
         // yüklenen banner reklamımızı göstermek için aşağıdaki kodu kullanıyoruz.
         _bannerAd.Show();
     }
+    // BANNERAD END
+
 
     // FULLSCREENAD - START
     public void requestFullScreenAd()
@@ -106,25 +96,14 @@ public class AdManager : MonoBehaviour
         AdRequest adRequest = new AdRequest.Builder().Build();
 
         _fullscreenAd.LoadAd(adRequest);
-    }
 
-    public void showFullScreenAd()
-    {
-        FullScreen.text = "İçerde";
-        if (_fullscreenAd.IsLoaded())
-        {
-            FullScreen.text = "Calıştı";
-            _fullscreenAd.Show();
-            FullScreenAdControl = true;
+        // Reklam yüklenmesini bekler ondan sonra reklamı gösterir.
+        _fullscreenAd.OnAdLoaded += (sender, args) => { _fullscreenAd.Show(); };
 
-        }
-        else
-        {
-            FullScreen.text = "Daha Yüklenmedi";
-            Debug.Log("FullScreenAd daha yüklenmedi!!");
-        }
+
     }
     // FULLSCREENAD - END
+
 
     // REWARDEDAD - START
     public void requestRewardedAd()
@@ -134,22 +113,17 @@ public class AdManager : MonoBehaviour
         AdRequest adRequest = new AdRequest.Builder().Build();
 
         _rewardBasedVideoAd.LoadAd(adRequest, _rewardedAdID);
-    }
 
-    public void showRewardedAd()
-    {
-        Rewarded.text = "İçerde";
-        if (_rewardBasedVideoAd.IsLoaded())
-        {
-            Rewarded.text = "Çalıştı";
-            _rewardBasedVideoAd.Show();
-            RewardedAdControl = true;
-        }
-        else
-        {
-            Rewarded.text = "Daha Yüklenmedi";
-            Debug.Log("Rewarded reklamımız daha yüklenmedi!!");
-        }
-    }
+        _rewardBasedVideoAd.OnAdLoaded += (sender, args) => { _rewardBasedVideoAd.Show(); };
 
+        _rewardBasedVideoAd.OnAdRewarded += (sender, args) =>
+        {
+            _bannerAd.Hide();
+            Rewarded.text = "Kazandı";
+            star = PlayerPrefs.GetInt("star");
+            star += 10;
+            PlayerPrefs.SetInt("star", star);
+        };
+    }
+    // REWARDEDAD - END
 }

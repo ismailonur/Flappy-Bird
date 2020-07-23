@@ -88,6 +88,5 @@ public class OyunKontrol : MonoBehaviour
             fizikIki.velocity = Vector2.zero;
         }
         oyunBitti = false;
-        Time.timeScale = 0;
     }
 }
