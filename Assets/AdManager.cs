@@ -41,17 +41,14 @@ public class AdManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        
 
-        #if UNITY_ANDROID
-            string appId = "ca-app-pub-7215776518930801~4603552933";
-        #elif UNITY_IPHONE
-            string appId = "ca-app-pub-7215776518930801~4603552933";
-        #else
-            string appId= "unexpected_platform";
-        #endif
-        
-        MobileAds.Initialize(appId);
+
+        // Initialize the Google Mobile Ads SDK.
+        MobileAds.Initialize(initStatus => { });
+
+        _rewardBasedVideoAd = RewardBasedVideoAd.Instance;
+
+        _rewardBasedVideoAd.OnAdRewarded += HandleRewardBasedVideoRewarded;
 
     }
 
@@ -108,7 +105,6 @@ public class AdManager : MonoBehaviour
     // REWARDEDAD - START
     public void requestRewardedAd()
     {
-        _rewardBasedVideoAd = RewardBasedVideoAd.Instance;
 
         AdRequest adRequest = new AdRequest.Builder().Build();
 
@@ -116,14 +112,15 @@ public class AdManager : MonoBehaviour
 
         _rewardBasedVideoAd.OnAdLoaded += (sender, args) => { _rewardBasedVideoAd.Show(); };
 
-        _rewardBasedVideoAd.OnAdRewarded += (sender, args) =>
-        {
-            _bannerAd.Hide();
-            Rewarded.text = "Kazandı";
-            star = PlayerPrefs.GetInt("star");
-            star += 10;
-            PlayerPrefs.SetInt("star", star);
-        };
+
+    }
+
+    public void HandleRewardBasedVideoRewarded(object sender, Reward args)
+    {
+        Rewarded.text = "Kazandı";
+        star = PlayerPrefs.GetInt("star");
+        star += 10;
+        PlayerPrefs.SetInt("star", star);
     }
     // REWARDEDAD - END
 }
